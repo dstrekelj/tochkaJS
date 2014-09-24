@@ -23,6 +23,10 @@ var mainState = {
 	 */
     create:	function() {
 		/**
+		 * Set up conditional variables.
+		 */
+		this.isReady = false;
+		/**
 		 * Enable (arcade) physics, making extra calculations
 		 * unnecessary.
 		 */
@@ -40,29 +44,43 @@ var mainState = {
 		this.obstacles = game.add.group();
 		this.obstacles.enableBody = true;
 		this.obstacles.createMultiple(15 , 'obstacle');
-		this.scoreTimer = game.time.events.loop(1000, this.addScore, this);
+		this.spawnTimer = null;
 		/**
 		 * Define score label (score, text, increment timer).
 		 */
 		this.score = 0;
-		this.labelScore = game.add.text(20, 20, "0", {font: "16px Arial", fill: "#ffffff"});
-		this.timer = game.time.events.loop(300, this.addObstacle, this);
+		this.labelScore = game.add.text(20, 20, "SCORE: 0", {font: "16px Arial", fill: "#ffffff"});
+		this.scoreTimer = null;
+		this.labelInstructions = game.add.text(20, 36, "PRESS SPACE TO JUMP / START", {font: "16px Arial", fill: "#ffffff"});
 		/**
 		 * Define controls.
 		 */
-		var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-		spaceKey.onDown.add(this.jump, this);
+		this.spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+		this.spaceKey.onDown.add(this.jump, this);
     },
 
 	/**
 	 * Update game state.
 	 */
     update:	function() {
-		if (this.player.inWorld == false) {
-			this.retry();
-		}
+		if (!this.isReady) {
+			this.player.body.enable = false;
+			
+			if (this.spaceKey.isDown) {
+				this.isReady = true;
+				this.player.body.enable = true;
+				this.spawnTimer = game.time.events.loop(300, this.addObstacle, this);
+				this.scoreTimer = game.time.events.loop(1000, this.addScore, this);
+				this.labelScore.visible = true;
+				this.labelInstructions.visible = false;
+			}
+		} else {				
+				if (this.player.inWorld == false) {
+					this.retry();
+				}
 		
-		game.physics.arcade.overlap(this.player, this.obstacles, this.retry, null, this);
+			game.physics.arcade.overlap(this.player, this.obstacles, this.retry, null, this);
+		}
     },
 	
 	jump: function() {
@@ -88,7 +106,7 @@ var mainState = {
 	
 	addScore: function() {
 		this.score += 1;
-		this.labelScore.text = this.score;
+		this.labelScore.text = "SCORE: " + this.score;
 	},
 	
 	render: function()
