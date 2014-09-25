@@ -23,6 +23,12 @@ var mainState = {
 	 */
     create:	function() {
 		/**
+		 * Set up variable for tracking minimum fps. Minimum
+		 * is set to default game frame rate and changed
+		 * in render function when compared to current fps.
+		 */
+		this.fpsMin = 60;
+		/**
 		 * Set up conditional variables.
 		 */
 		this.isReady = false;
@@ -63,6 +69,10 @@ var mainState = {
 	 * Update game state.
 	 */
     update:	function() {
+		/**
+		 * If the player isn't ready, wait for input before
+		 * displaying / enabling game elements.
+		 */
 		if (!this.isReady) {
 			this.player.body.enable = false;
 			
@@ -75,22 +85,34 @@ var mainState = {
 				this.labelInstructions.visible = false;
 			}
 		} else {				
-				if (this.player.inWorld == false) {
-					this.retry();
-				}
+			if (this.player.inWorld == false) {
+				this.retry();
+			}
 		
 			game.physics.arcade.overlap(this.player, this.obstacles, this.retry, null, this);
 		}
     },
 	
+	/**
+	 * Function handling player's jump.
+	 */
 	jump: function() {
 		this.player.body.velocity.y = -450;
 	},
 	
+	/**
+	 * Function handling game retry.
+	 *
+	 * TODO: Wait for obstacles to be removed from screen,
+	 * ask player for input before reloading.
+	 */	 
 	retry: function() {
 		game.state.start('main');
 	},
 	
+	/**
+	 * Function adding obstacles.
+	 */
 	addObstacle: function() {
 		var obstacle = this.obstacles.getFirstDead();
 		
@@ -104,19 +126,29 @@ var mainState = {
 		obstacle.outOfBoundsKill = true;
 	},
 	
+	/**
+	 * Function tracking and displaying score.
+	 */
 	addScore: function() {
 		this.score += 1;
 		this.labelScore.text = "SCORE: " + this.score;
 	},
 	
+	/**
+	 * Function handling rendering. Usually not overriden,
+	 * but necessary to display debug text (e.g. fps).
+	 */
 	render: function()
 	{
-		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00");
+		if (this.fpsMin > game.time.fps) {
+			this.fpsMin = game.time.fps;
+		}
+		game.debug.text(('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax) || ('FPS: -- \tMIN: -- \tMAX: --'), 2, 14, "#00ff00");
 	}
 };
 
 /**
- * Add mainState as main game state and starting point
+ * Add mainState as main game state and starting point.
  */
 game.state.add('main', mainState);
 game.state.start('main');
