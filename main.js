@@ -23,7 +23,7 @@ var mainState = {
 	 */
     create:	function() {
 		/**
-		 * Set up variable for tracking minimum fps. Minimum
+		 * Set up variable for tracking fps. Minimum fps
 		 * is set to default game frame rate and changed
 		 * in render function when compared to current fps.
 		 */
@@ -50,13 +50,18 @@ var mainState = {
 		this.obstacles = game.add.group();
 		this.obstacles.enableBody = true;
 		this.obstacles.createMultiple(15 , 'obstacle');
-		this.spawnTimer = null;
+		this.spawnTimer = game.time.create(false);
+		this.spawnTimer.loop(300, this.addObstacle, this);
 		/**
 		 * Define score label (score, text, increment timer).
 		 */
 		this.score = 0;
 		this.labelScore = game.add.text(20, 20, "SCORE: 0", {font: "16px Arial", fill: "#ffffff"});
-		this.scoreTimer = null;
+		this.scoreTimer = game.time.create(false);
+		this.scoreTimer.loop(1000, this.addScore, this);
+		/**
+		 * Define instructions label.
+		 */
 		this.labelInstructions = game.add.text(20, 36, "PRESS SPACE TO JUMP / START", {font: "16px Arial", fill: "#ffffff"});
 		/**
 		 * Define controls.
@@ -79,8 +84,8 @@ var mainState = {
 			if (this.spaceKey.isDown) {
 				this.isReady = true;
 				this.player.body.enable = true;
-				this.spawnTimer = game.time.events.loop(300, this.addObstacle, this);
-				this.scoreTimer = game.time.events.loop(1000, this.addScore, this);
+				this.spawnTimer.start();
+				this.scoreTimer.start();
 				this.labelScore.visible = true;
 				this.labelInstructions.visible = false;
 			}
@@ -102,12 +107,41 @@ var mainState = {
 	
 	/**
 	 * Function handling game retry.
-	 *
-	 * TODO: Wait for obstacles to be removed from screen,
-	 * ask player for input before reloading.
 	 */	 
 	retry: function() {
-		game.state.start('main');
+		this.spawnTimer.stop();
+		this.scoreTimer.stop();
+		
+		/**
+		 * Conditional on line 93
+		 * (if (this.player.inWorld == false))
+		 * makes moving the player sprite out of world bounds
+		 * a requirement in order to retry the game.
+		 *
+		 * Variables enableBody, velocity.y and gravity.y do
+		 * not need to be changed, they're there to mimic
+		 * original behaviour.
+		 * 
+		 * A refactor will be necessary in order to achieve
+		 * higher similarity to original.
+		 */		
+		this.player.x = -50;
+		this.player.enableBody = false;
+		this.player.body.velocity.y = 0;
+		this.player.body.gravity.y = 0;
+	
+		this.spaceKey.enabled = false;
+		
+		if (this.obstacles.countLiving() == 0) {
+			this.labelInstructions.text = "PRESS SPACE TO RESTART";
+			this.labelInstructions.visible = true;
+			
+			this.spaceKey.enabled = true;
+			
+			if (this.spaceKey.isDown) {
+				game.state.start('main');
+			}
+		}
 	},
 	
 	/**
@@ -140,10 +174,11 @@ var mainState = {
 	 */
 	render: function()
 	{
-		if (this.fpsMin > game.time.fps) {
+		if ((game.time.fps > 0) && (this.fpsMin > game.time.fps)) {
 			this.fpsMin = game.time.fps;
 		}
-		game.debug.text(('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax) || ('FPS: -- \tMIN: -- \tMAX: --'), 2, 14, "#00ff00");
+				
+		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax, 2, 14, "#00ff00");
 	}
 };
 
