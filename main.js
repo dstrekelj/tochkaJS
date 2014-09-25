@@ -28,6 +28,7 @@ var mainState = {
 		 * in render function when compared to current fps.
 		 */
 		this.fpsMin = 60;
+		this.fpsAvg = 0;
 		/**
 		 * Set up conditional variables.
 		 */
@@ -177,8 +178,13 @@ var mainState = {
 		if ((game.time.fps > 0) && (this.fpsMin > game.time.fps)) {
 			this.fpsMin = game.time.fps;
 		}
-				
-		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax, 2, 14, "#00ff00");
+		if (this.fpsAvg == 0) {
+			this.fpsAvg += game.time.fps;
+		} else {
+			this.fpsAvg += game.time.fps;
+			this.fpsAvg = Math.round((this.fpsAvg / 2) * 100) / 100;
+		}
+		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax + ' \tAVG: ' + this.fpsAvg, 2, 14, "#00ff00");
 	}
 };
 
