@@ -29,6 +29,7 @@ var mainState = {
 		 */
 		this.fpsMin = 60;
 		this.fpsAvg = 0;
+		this.fpsCount = 0;
 		/**
 		 * Set up conditional variables.
 		 */
@@ -175,15 +176,24 @@ var mainState = {
 	 */
 	render: function()
 	{
+		/**
+		 * Every time the game is rendered, the current
+		 * fps value is recorded - so increase the counter.
+		 */
+		this.fpsCount += 1;
+		/**
+		 * Set the minimum fps, but do not evaluate 0 fps.
+		 */
 		if ((game.time.fps > 0) && (this.fpsMin > game.time.fps)) {
-			this.fpsMin = game.time.fps;
+			this.fpsMin = game.time.fps;			
 		}
-		if (this.fpsAvg == 0) {
-			this.fpsAvg += game.time.fps;
-		} else {
-			this.fpsAvg += game.time.fps;
-			this.fpsAvg = Math.round((this.fpsAvg / 2) * 100) / 100;
-		}
+		/**
+		 * Calculate incremental average fps.
+		 */
+		this.fpsAvg = Math.round((this.fpsAvg + (game.time.fps - this.fpsAvg)/this.fpsCount ) * 100) / 100;
+		/**
+		 * Display FPS counter (current, min, max, average).
+		 */
 		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax + ' \tAVG: ' + this.fpsAvg, 2, 14, "#00ff00");
 	}
 };
