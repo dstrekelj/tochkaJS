@@ -30,6 +30,9 @@ var mainState = {
 		this.fpsMin = 60;
 		this.fpsAvg = 0;
 		this.fpsCount = 0;
+		this.fpsSum = 0;
+		this.fpsSqrSum = 0;
+		this.fpsVar;
 		/**
 		 * Set up conditional variables.
 		 */
@@ -181,6 +184,8 @@ var mainState = {
 		 * fps value is recorded - so increase the counter.
 		 */
 		this.fpsCount += 1;
+		this.fpsSum += game.time.fps;
+		this.fpsSqrSum += (game.time.fps * game.time.fps);
 		/**
 		 * Set the minimum fps, but do not evaluate 0 fps.
 		 */
@@ -191,10 +196,13 @@ var mainState = {
 		 * Calculate incremental average fps.
 		 */
 		this.fpsAvg = Math.round((this.fpsAvg + (game.time.fps - this.fpsAvg)/this.fpsCount ) * 100) / 100;
+		
+		this.fpsVar = Math.round((1 / this.fpsCount) * (this.fpsSqrSum - ((this.fpsSum * this.fpsSum) / this.fpsCount)) * 100) / 100;
+		
 		/**
 		 * Display FPS counter (current, min, max, average).
 		 */
-		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax + ' \tAVG: ' + this.fpsAvg, 2, 14, "#00ff00");
+		game.debug.text('FPS: ' + game.time.fps + ' \tMIN: ' + this.fpsMin + ' \tMAX: ' + game.time.fpsMax + ' \tAVG: ' + this.fpsAvg + ' \tVAR: ' + this.fpsVar, 2, 14, "#00ff00");
 	}
 };
 
