@@ -197,7 +197,7 @@ var mainState = {
 		 */
 		this.fpsAvg = Math.round((this.fpsAvg + (game.time.fps - this.fpsAvg)/this.fpsCount ) * 100) / 100;
 		
-		this.fpsVar = Math.round((1 / this.fpsCount) * (this.fpsSqrSum - ((this.fpsSum * this.fpsSum) / this.fpsCount)) * 100) / 100;
+		this.fpsVar = Math.round((1 / this.fpsCount) * (this.fpsSqrSum - ((this.fpsSum * this.fpsSum) / this.fpsCount)) * 10000) / 10000;
 		
 		/**
 		 * Display FPS counter (current, min, max, average).
